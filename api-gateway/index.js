@@ -14,7 +14,7 @@ app.use(
     changeOrigin: true,
   })
 );
-
+// ////////////
 const authCheck = async (req, res, next) => {
   const token = req.headers.authorization;
 
@@ -28,7 +28,7 @@ const authCheck = async (req, res, next) => {
     res.status(401).json({ message: "Invalid token" });
   }
 };
-
+// ////////////////
 app.use(
   "/api/products",
   authCheck,
