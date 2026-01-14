@@ -2,36 +2,34 @@ import jwt from "jsonwebtoken";
 import { User } from "../models/User.js";
 import jwtConfig from "../config/jwt.js";
 import bcrypt from "bcrypt";
+import AuthGlobalErrorHandler from "../utils/Auth.Global.Errorhandle.js";
 
 class AuthService {
   async createUser(data) {
-    const { name, email, password, role } = data;
-    if (!name || !email || !password || role) {
-      throw {
-        statusCode: 400,
-        message: "All fields are required",
-      };
+    const { name, email, password } = data;
+    if (!name || !email || !password) {
+      throw AuthGlobalErrorHandler(400, "All fields are required");
     }
 
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-      throw { statusCode: 409, message: "User already exists " };
+      throw AuthGlobalErrorHandler(409, "User already exists");
     }
 
     const hashPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({
+    const signUpUser = await User.create({
       name,
       email,
       password: hashPassword,
       role,
     });
     return {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
+      id: signUpUser._id,
+      name: signUpUser.name,
+      email: signUpUser.email,
+      role: signUpUser.role,
     };
   }
 
@@ -39,29 +37,54 @@ class AuthService {
     const { email, password } = data;
 
     if (!email || !password) {
-      throw new Error("All fields are required");
+      throw AuthGlobalErrorHandler(400, "All fields are required");
     }
 
-    const loginUser = await findOne({ email });
-    if (!loginUser) throw new Error("Invalid credential");
+    const loginUser = await User.findOne({ email });
+    if (!loginUser) throw AuthGlobalErrorHandler(401, "Invalid Credentials");
 
     const isMatch = await bcrypt.compare(password, loginUser.password);
-    if (!isMatch) throw new Error("Invalid password");
+    if (!isMatch) throw AuthGlobalErrorHandler(401, "Invalid Credentials");
 
     const token = jwt.sign(
-      { userId: User._id, role: User.role },
+      { userId: loginUser._id, role: loginUser.role },
       jwtConfig.accessSecret,
       { expiresIn: jwtConfig.accessExpiry }
     );
     return {
       token,
       user: {
-        id: User._id,
-        name: User.name,
-        email: User.email,
-        role: User.role,
+        id: loginUser._id,
+        name: loginUser.name,
+        email: loginUser.email,
+        role: loginUser.role,
       },
     };
+  }
+
+  async getProfile(userId) {
+    const userProfileId = await User.findById(userId).select("-password");
+    if (!userProfileId) throw AuthGlobalErrorHandler(404, "User not found");
+
+    return userProfileId;
+  }
+
+  async getAllUser(page = 1, limit = 10) {
+    const skip = (page - 1) * limit;
+
+    const getAllProfile = await User.find({})
+      .select("-password")
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    return getAllProfile;
+  }
+
+  async logOut(userId) {
+    await User.findByIdAndUpdate(userId, {
+      $unset: { refreshToken: "" },
+    });
   }
 }
 
