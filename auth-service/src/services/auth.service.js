@@ -1,5 +1,6 @@
-import jwt from "../config/jwt";
-import { User } from "../models/User";
+import jwt from "jsonwebtoken";
+import { User } from "../models/User.js";
+import jwtConfig from "../config/jwt.js";
 import bcrypt from "bcrypt";
 
 class AuthService {
@@ -47,7 +48,20 @@ class AuthService {
     const isMatch = await bcrypt.compare(password, loginUser.password);
     if (!isMatch) throw new Error("Invalid password");
 
-    const token = jwt.accessSecret();
+    const token = jwt.sign(
+      { userId: User._id, role: User.role },
+      jwtConfig.accessSecret,
+      { expiresIn: jwtConfig.accessExpiry }
+    );
+    return {
+      token,
+      user: {
+        id: User._id,
+        name: User.name,
+        email: User.email,
+        role: User.role,
+      },
+    };
   }
 }
 
