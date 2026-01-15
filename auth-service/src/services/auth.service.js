@@ -40,10 +40,17 @@ class AuthService {
       throw AuthGlobalErrorHandler(400, "All fields are required");
     }
 
+    const allowedRoles = ["user", "admin"];
+    if (!allowedRoles.includes(role)) {
+      throw AuthGlobalErrorHandler(400, "Invalid role");
+    }
+
     const loginUser = await User.findOne({ email });
+
     if (!loginUser) throw AuthGlobalErrorHandler(401, "Invalid Credentials");
 
     const isMatch = await bcrypt.compare(password, loginUser.password);
+
     if (!isMatch) throw AuthGlobalErrorHandler(401, "Invalid Credentials");
 
     const token = jwt.sign(
@@ -51,8 +58,16 @@ class AuthService {
       jwtConfig.accessSecret,
       { expiresIn: jwtConfig.accessExpiry }
     );
+
+    const refreshToken = jwt.sign(
+      { userId: loginUser._id },
+      jwtConfig.refreshSecret,
+      { expiresIn: jwtConfig.accessExpiry }
+    );
+
     return {
       token,
+      refreshToken,
       user: {
         id: loginUser._id,
         name: loginUser.name,
