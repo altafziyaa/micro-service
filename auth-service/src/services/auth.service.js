@@ -85,15 +85,29 @@ class AuthService {
   }
 
   async getAllUser(page = 1, limit = 10) {
-    const skip = (page - 1) * limit;
+    page = Number(page);
+    limit = Number(limit);
 
-    const getAllProfile = await User.find({})
+    if (page < 1 || limit < 1) {
+      throw AuthGlobalErrorHandler(400, "Invalid pagination parameters");
+    }
+
+    const skip = (page - 1) * limit;
+    const totalUsers = await User.countDocuments();
+
+    const getAllProfile = await User.find()
       .select("-password")
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });
 
-    return getAllProfile;
+    return {
+      page,
+      limit,
+      totalUsers,
+      totalPages: Math.ceil(totalUsers / limit),
+      getAllProfile,
+    };
   }
 
   async logOut(userId) {
