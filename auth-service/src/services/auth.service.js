@@ -6,15 +6,15 @@ import AuthGlobalErrorHandler from "../utils/Auth.Global.Errorhandle.js";
 
 class AuthService {
   async createUser(data) {
-    const { name, email, password } = data;
+    const { name, email, password, role = "user" } = data;
     if (!name || !email || !password) {
-      throw AuthGlobalErrorHandler(400, "All fields are required");
+      throw new AuthGlobalErrorHandler(400, "All fields are required");
     }
 
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-      throw AuthGlobalErrorHandler(409, "User already exists");
+      throw new AuthGlobalErrorHandler(409, "User already exists");
     }
 
     const hashPassword = await bcrypt.hash(password, 10);
@@ -37,23 +37,19 @@ class AuthService {
     const { email, password } = data;
 
     if (!email || !password) {
-      throw AuthGlobalErrorHandler(400, "All fields are required");
-    }
-
-    const allowedRoles = ["user", "admin"];
-    if (!allowedRoles.includes(role)) {
-      throw AuthGlobalErrorHandler(400, "Invalid role");
+      throw new AuthGlobalErrorHandler(400, "All fields are required");
     }
 
     const loginUser = await User.findOne({ email });
 
-    if (!loginUser) throw AuthGlobalErrorHandler(401, "Invalid Credentials");
+    if (!loginUser)
+      throw new AuthGlobalErrorHandler(401, "Invalid Credentials");
 
     const isMatch = await bcrypt.compare(password, loginUser.password);
 
-    if (!isMatch) throw AuthGlobalErrorHandler(401, "Invalid Credentials");
+    if (!isMatch) throw new AuthGlobalErrorHandler(401, "Invalid Credentials");
 
-    const token = jwt.sign(
+    const accessToken = jwt.sign(
       { userId: loginUser._id, role: loginUser.role },
       jwtConfig.accessSecret,
       { expiresIn: jwtConfig.accessExpiry }
@@ -62,8 +58,11 @@ class AuthService {
     const refreshToken = jwt.sign(
       { userId: loginUser._id },
       jwtConfig.refreshSecret,
-      { expiresIn: jwtConfig.accessExpiry }
+      { expiresIn: jwtConfig.refreshExpiry }
     );
+
+    loginUser.refreshToken = refreshToken;
+    await loginUser.save();
 
     return {
       token,
@@ -78,8 +77,11 @@ class AuthService {
   }
 
   async getProfile(userId) {
-    const userProfileId = await User.findById(userId).select("-password");
-    if (!userProfileId) throw AuthGlobalErrorHandler(404, "User not found");
+    const userProfileId = await User.findById({
+      _id: userId,
+      isDeleted: false,
+    }).select("-password");
+    if (!userProfileId) throw new AuthGlobalErrorHandler(404, "User not found");
 
     return userProfileId;
   }
@@ -89,11 +91,22 @@ class AuthService {
     limit = Number(limit);
 
     if (page < 1 || limit < 1) {
-      throw AuthGlobalErrorHandler(400, "Invalid pagination parameters");
+      throw new AuthGlobalErrorHandler(400, "Invalid pagination parameters");
     }
 
+    limit = Math.min(limit, 100);
     const skip = (page - 1) * limit;
+
     const totalUsers = await User.countDocuments();
+    if (totalUsers === 0) {
+      return {
+        page,
+        limit,
+        totalUsers: 0,
+        totalPages: 0,
+        getAllProfile: [],
+      };
+    }
 
     const getAllProfile = await User.find()
       .select("-password")
@@ -109,11 +122,102 @@ class AuthService {
       getAllProfile,
     };
   }
+  async updateUser(userId, data) {
+    const { name, email, password, role } = data;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new AuthGlobalErrorHandler("User not found", 404);
+    }
+
+    // email update + duplicate check
+    if (email && email.toLowerCase() !== user.email) {
+      const emailExists = await User.findOne({ email: email.toLowerCase() });
+      if (emailExists) {
+        throw new AuthGlobalErrorHandler("Email already in use", 409);
+      }
+      user.email = email.toLowerCase();
+    }
+
+    if (name) user.name = name;
+
+    // password update
+    if (password) {
+      user.password = await bcrypt.hash(password, 10);
+    }
+
+    // role update (ADMIN ONLY – controller/middleware should protect)
+    if (role) {
+      const allowedRoles = ["user", "admin"];
+      if (!allowedRoles.includes(role)) {
+        throw new AuthGlobalErrorHandler("Invalid role", 400);
+      }
+      user.role = role;
+    }
+
+    await user.save();
+
+    return {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    };
+  }
+
+  async updateOwnProfile(userId, data) {
+    const { name, password } = data;
+
+    const user = await User.findOne({ _id: userId, isDeleted: false });
+    if (!user) {
+      throw new AuthGlobalErrorHandler("User not found", 404);
+    }
+
+    if (name) user.name = name;
+
+    if (password) {
+      user.password = await bcrypt.hash(password, 10);
+    }
+
+    await user.save();
+
+    return {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    };
+  }
+
+  async deleteUser(userId) {
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { isDeleted: true },
+      { new: true }
+    );
+
+    if (!user) {
+      throw new AuthGlobalErrorHandler(404, "User not found");
+    }
+
+    return {
+      message: "User deleted successfully",
+      id: user._id,
+    };
+  }
 
   async logOut(userId) {
-    await User.findByIdAndUpdate(userId, {
-      $unset: { refreshToken: "" },
-    });
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $unset: { refreshToken: "" } },
+      { new: true }
+    );
+
+    if (!user) {
+      throw new AuthGlobalErrorHandler(404, "User not found");
+    }
+
+    return { message: "Logout successful" };
   }
 }
 

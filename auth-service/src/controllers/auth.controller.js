@@ -1,94 +1,123 @@
-import authService from "../services/auth.service";
+import authService from "../services/auth.service.js";
 
 class AuthController {
-  async createUser(req, res, next) {
-    const { name, email, password, role } = req.body;
+  createUser = async (req, res, next) => {
     try {
-      if (![name, email, password, role].every(Boolean)) {
-        return res.status(400).json({ message: "All fields are required" });
-      }
-
-      const UserData = await authService.createUser({
-        name,
-        email,
-        password,
-        role,
-      });
-
-      res.status(201).json({ success: true, data: UserData });
-    } catch (error) {
-      next(error);
-    }
-  }
-  async signIn(req, res, next) {
-    const { email, password } = req.body;
-    try {
-      if (!email || !password) {
-        return res
-          .status(401)
-          .json({ message: "Email and password are required" });
-      }
-      const loginUser = await authService.login({
-        email,
-        password,
-      });
-
-      res.status(200).json({
-        success: true,
-        message: "Login successfully",
-        data: loginUser,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-  async getMyProfile(req, res, next) {
-    const userId = req.user?.userId;
-    try {
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const userProfile = await authService.getProfile(userId);
+      const user = await authService.createUser(req.body);
 
       return res.status(201).json({
+        success: true,
+        message: "User created successfully",
+        data: user,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  signIn = async (req, res, next) => {
+    try {
+      const result = await authService.login(req.body);
+
+      return res.status(200).json({
+        success: true,
+        message: "Login successful",
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getMyProfile = async (req, res, next) => {
+    try {
+      const profile = await authService.getProfile(req.user.userId);
+
+      return res.status(200).json({
         success: true,
         message: "Profile fetched successfully",
-        userProfile,
+        data: profile,
       });
     } catch (error) {
       next(error);
     }
-  }
+  };
 
-  async getAllProfiles(req, res, next) {
-    const { page = 1, limit = 1 } = req.query;
+  getAllProfiles = async (req, res, next) => {
     try {
-      const result = await authService.getAllUser(page, limit);
-      return res
-        .status(200)
-        .json({ message: "Users fetched successfully", data: result });
-    } catch (error) {
-      next(error);
-    }
-  }
+      const { page = 1, limit = 10 } = req.query;
 
-  async signOut(req, res, next) {
-    const userId = req.user?.userId;
-    try {
-      if (!userId) {
-        res
-          .status(401)
-          .json({ success: false, message: "Unauthorized: user not found" });
-      }
-      await authService.logOut(userId);
+      const users = await authService.getAllUser(page, limit);
 
-      return res.status(201).json({
+      return res.status(200).json({
         success: true,
-        message: "user logOut successfully",
+        message: "Users fetched successfully",
+        data: users,
       });
     } catch (error) {
       next(error);
     }
-  }
+  };
+
+  // ✅ USER updates OWN profile
+  updateMyProfile = async (req, res, next) => {
+    try {
+      const updatedUser = await authService.updateOwnProfile(
+        req.user.userId,
+        req.body
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Profile updated successfully",
+        data: updatedUser,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  // ✅ ADMIN updates ANY user
+  updateUserByAdmin = async (req, res, next) => {
+    try {
+      const updatedUser = await authService.updateUser(req.params.id, req.body);
+
+      return res.status(200).json({
+        success: true,
+        message: "User updated successfully",
+        data: updatedUser,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  // ✅ ADMIN deletes user (SOFT DELETE)
+  deleteUser = async (req, res, next) => {
+    try {
+      await authService.deleteUser(req.params.id);
+
+      return res.status(200).json({
+        success: true,
+        message: "User deleted successfully",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  signOut = async (req, res, next) => {
+    try {
+      await authService.logOut(req.user.userId);
+
+      return res.status(200).json({
+        success: true,
+        message: "Logout successful",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
+
+export default new AuthController();

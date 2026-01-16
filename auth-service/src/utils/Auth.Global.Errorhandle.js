@@ -1,7 +1,7 @@
 import { Error } from "mongoose";
 
 class AuthGlobalErrorHandler extends Error {
-  constructor(message, statusCode) {
+  constructor(statusCode, message) {
     super(message);
     this.statusCode = statusCode;
     this.status = `${statusCode}`.startsWith("4") ? "fail" : "error";
