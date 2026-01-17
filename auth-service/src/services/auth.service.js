@@ -65,7 +65,7 @@ class AuthService {
     await loginUser.save();
 
     return {
-      token,
+      accessToken,
       refreshToken,
       user: {
         id: loginUser._id,
@@ -77,13 +77,14 @@ class AuthService {
   }
 
   async getProfile(userId) {
-    const userProfileId = await User.findById({
-      _id: userId,
-      isDeleted: false,
-    }).select("-password");
-    if (!userProfileId) throw new AuthGlobalErrorHandler(404, "User not found");
-
-    return userProfileId;
+    if (!userId) {
+      throw new AuthGlobalErrorHandler(401, "Unauthorized");
+    }
+    const userProfile = await User.findById(userId).select("-password");
+    if (!userProfile) {
+      throw new AuthGlobalErrorHandler(404, "User not found");
+    }
+    return userProfile;
   }
 
   async getAllUser(page = 1, limit = 10) {
@@ -124,11 +125,10 @@ class AuthService {
   }
 
   async deleteUser(userId) {
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { isDeleted: true },
-      { new: true },
-    );
+    if (!userId) {
+      throw new AuthGlobalErrorHandler(401, "Unauthorized");
+    }
+    const user = await User.findByIdAndUpdate(userId);
 
     if (!user) {
       throw new AuthGlobalErrorHandler(404, "User not found");
@@ -141,6 +141,9 @@ class AuthService {
   }
 
   async logOut(userId) {
+    if (!userId) {
+      throw new AuthGlobalErrorHandler(401, "Unauthorized");
+    }
     const user = await User.findByIdAndUpdate(
       userId,
       { $unset: { refreshToken: "" } },

@@ -30,13 +30,20 @@ class AuthController {
   };
 
   getMyProfile = async (req, res, next) => {
+    const userId = req.user?.userId;
     try {
-      const profile = await authService.getProfile(req.user.userId);
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: "Unauthorized",
+        });
+      }
+      const profile = await authService.getProfile(userId);
 
       return res.status(200).json({
         success: true,
         message: "Profile fetched successfully",
-        data: profile,
+        profile,
       });
     } catch (error) {
       next(error);
@@ -60,8 +67,16 @@ class AuthController {
   };
 
   deleteUser = async (req, res, next) => {
+    const userId = req.user?.userId;
+
     try {
-      await authService.deleteUser(req.params.id);
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: "Unauthorized",
+        });
+      }
+      await authService.deleteUser(userId);
 
       return res.status(200).json({
         success: true,
@@ -73,8 +88,16 @@ class AuthController {
   };
 
   signOut = async (req, res, next) => {
+    const logOutId = req.user?.userId;
+
     try {
-      await authService.logOut(req.user.userId);
+      if (!logOutId) {
+        return res.status(401).json({
+          success: false,
+          message: "Unauthorized",
+        });
+      }
+      await authService.logOut(logOutId);
 
       return res.status(200).json({
         success: true,

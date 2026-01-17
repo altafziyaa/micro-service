@@ -2,7 +2,8 @@ import jwt from "jsonwebtoken";
 import jwtConfig from "../config/jwt.js";
 
 export const authMiddleware = (req, res, next) => {
-  const authHeader = req.headers.authorization?.split(" ")[1];
+  const authHeader = req.headers.authorization;
+  console.log("AUTH HEADER:", req.headers.authorization);
 
   try {
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -10,8 +11,9 @@ export const authMiddleware = (req, res, next) => {
         .status(401)
         .json({ success: false, message: "Unauthorized : token missing" });
     }
+    const token = authHeader.split(" ")[1];
 
-    const tokenDecode = jwt.verify(authHeader, jwtConfig.accessSecret);
+    const tokenDecode = jwt.verify(token, jwtConfig.accessSecret);
 
     req.user = {
       userId: tokenDecode.userId,
