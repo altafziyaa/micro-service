@@ -68,7 +68,6 @@ class AuthController {
 
   deleteUser = async (req, res, next) => {
     const userId = req.user?.userId;
-
     try {
       if (!userId) {
         return res.status(401).json({
