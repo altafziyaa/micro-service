@@ -52,13 +52,13 @@ class AuthService {
     const accessToken = jwt.sign(
       { userId: loginUser._id, role: loginUser.role },
       jwtConfig.accessSecret,
-      { expiresIn: jwtConfig.accessExpiry }
+      { expiresIn: jwtConfig.accessExpiry },
     );
 
     const refreshToken = jwt.sign(
       { userId: loginUser._id },
       jwtConfig.refreshSecret,
-      { expiresIn: jwtConfig.refreshExpiry }
+      { expiresIn: jwtConfig.refreshExpiry },
     );
 
     loginUser.refreshToken = refreshToken;
@@ -122,78 +122,12 @@ class AuthService {
       getAllProfile,
     };
   }
-  async updateUser(userId, data) {
-    const { name, email, password, role } = data;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      throw new AuthGlobalErrorHandler("User not found", 404);
-    }
-
-    // email update + duplicate check
-    if (email && email.toLowerCase() !== user.email) {
-      const emailExists = await User.findOne({ email: email.toLowerCase() });
-      if (emailExists) {
-        throw new AuthGlobalErrorHandler("Email already in use", 409);
-      }
-      user.email = email.toLowerCase();
-    }
-
-    if (name) user.name = name;
-
-    // password update
-    if (password) {
-      user.password = await bcrypt.hash(password, 10);
-    }
-
-    // role update (ADMIN ONLY – controller/middleware should protect)
-    if (role) {
-      const allowedRoles = ["user", "admin"];
-      if (!allowedRoles.includes(role)) {
-        throw new AuthGlobalErrorHandler("Invalid role", 400);
-      }
-      user.role = role;
-    }
-
-    await user.save();
-
-    return {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    };
-  }
-
-  async updateOwnProfile(userId, data) {
-    const { name, password } = data;
-
-    const user = await User.findOne({ _id: userId, isDeleted: false });
-    if (!user) {
-      throw new AuthGlobalErrorHandler("User not found", 404);
-    }
-
-    if (name) user.name = name;
-
-    if (password) {
-      user.password = await bcrypt.hash(password, 10);
-    }
-
-    await user.save();
-
-    return {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    };
-  }
 
   async deleteUser(userId) {
     const user = await User.findByIdAndUpdate(
       userId,
       { isDeleted: true },
-      { new: true }
+      { new: true },
     );
 
     if (!user) {
@@ -210,7 +144,7 @@ class AuthService {
     const user = await User.findByIdAndUpdate(
       userId,
       { $unset: { refreshToken: "" } },
-      { new: true }
+      { new: true },
     );
 
     if (!user) {

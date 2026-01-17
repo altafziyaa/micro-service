@@ -59,40 +59,6 @@ class AuthController {
     }
   };
 
-  // ✅ USER updates OWN profile
-  updateMyProfile = async (req, res, next) => {
-    try {
-      const updatedUser = await authService.updateOwnProfile(
-        req.user.userId,
-        req.body
-      );
-
-      return res.status(200).json({
-        success: true,
-        message: "Profile updated successfully",
-        data: updatedUser,
-      });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  // ✅ ADMIN updates ANY user
-  updateUserByAdmin = async (req, res, next) => {
-    try {
-      const updatedUser = await authService.updateUser(req.params.id, req.body);
-
-      return res.status(200).json({
-        success: true,
-        message: "User updated successfully",
-        data: updatedUser,
-      });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  // ✅ ADMIN deletes user (SOFT DELETE)
   deleteUser = async (req, res, next) => {
     try {
       await authService.deleteUser(req.params.id);
