@@ -128,7 +128,7 @@ class AuthService {
     if (!userId) {
       throw new AuthGlobalErrorHandler(401, "Unauthorized");
     }
-    const user = await User.findByIdAndUpdate(userId);
+    const user = await User.findByIdAndDelete(userId);
 
     if (!user) {
       throw new AuthGlobalErrorHandler(404, "User not found");
@@ -138,6 +138,21 @@ class AuthService {
       message: "User deleted successfully",
       id: user._id,
     };
+  }
+
+  async updateProfile(userId, name) {
+    if (!userId) {
+      throw new AuthGlobalErrorHandler("invalid creadential");
+    }
+    if (!name) {
+      throw new AuthGlobalErrorHandler("invalid creadential");
+    }
+    const updateId = await User.findByIdAndUpdate(
+      userId,
+      { name },
+      { new: true },
+    ).select("name email");
+    return updateId;
   }
 
   async logOut(userId) {

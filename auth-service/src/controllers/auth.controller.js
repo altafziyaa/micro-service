@@ -1,3 +1,4 @@
+import { useId } from "react";
 import authService from "../services/auth.service.js";
 
 class AuthController {
@@ -86,6 +87,27 @@ class AuthController {
     }
   };
 
+  async updateProfile(req, res, next) {
+    const userId = req.user?.id;
+    const { name } = req.body;
+    try {
+      if (!name) {
+        return res
+          .status(401)
+          .json({ success: false, message: "Name is required" });
+      }
+      const profileId = await authService.updateProfile(userId, name);
+      if (!profileId) {
+        return res.status(401).json({ success: false, message: "" });
+      }
+
+      return res
+        .status(200)
+        .json({ success: true, message: "user updated successfully" });
+    } catch (error) {
+      next(error);
+    }
+  }
   signOut = async (req, res, next) => {
     const logOutId = req.user?.userId;
 
@@ -96,6 +118,7 @@ class AuthController {
           message: "Unauthorized",
         });
       }
+
       await authService.logOut(logOutId);
 
       return res.status(200).json({
