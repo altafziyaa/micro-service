@@ -7,7 +7,9 @@ router.post("/signup", authController.createUser);
 router.post("/login", authController.signIn);
 router.post("/logout", authController.signOut);
 router.get("/my-profile", authMiddleware, authController.getMyProfile);
+router.get("/update-profile", authMiddleware, authController.updateProfile);
 router.get("/all-users", authMiddleware, authController.getAllProfiles);
+
 router.delete("/delete-profile", authMiddleware, authController.deleteUser);
 
 export default router;

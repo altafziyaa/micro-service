@@ -87,7 +87,7 @@ class AuthController {
     }
   };
 
-  async updateProfile(req, res, next) {
+  updateProfile= async (req, res, next)=> {
     const userId = req.user?.id;
     const { name } = req.body;
     try {
