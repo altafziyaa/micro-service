@@ -1,6 +1,6 @@
 import { Error } from "mongoose";
 
-class AuthGlobalErrorHandler extends Error {
+class productGlobalErrorHandler extends Error {
   constructor(statusCode, message) {
     super(message);
     this.statusCode = statusCode;
@@ -9,4 +9,4 @@ class AuthGlobalErrorHandler extends Error {
   }
 }
 
-export default AuthGlobalErrorHandler;
+export default productGlobalErrorHandler;
