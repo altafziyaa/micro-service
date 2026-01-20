@@ -1,22 +1,31 @@
 import mongoose from "mongoose";
 import productGlobalErrorHandler from "../utils/globalErrorHandler";
-import { product } from "../model/productSchema.js";
+import Product from "../model/productSchema.js"
 class productService {
     async createProduct(name, description, images, categoryId, price) {
-        if (!name || !description || !categoryId || !price) {
-            throw new productGlobalErrorHandler();
+
+        if (!name || !description || !images || !categoryId || !price) {
+            throw new productGlobalErrorHandler(400, "All fields are required")
         }
-        if (price.amount <= 0) throw new productGlobalErrorHandler();
+
+        if (!price.amout || price <= 0) {
+            throw new productGlobalErrorHandler(400, "Add some amount ")
+        }
 
         if (!mongoose.Types.ObjectId.isValid(categoryId)) {
-            throw new productGlobalErrorHandler();
+
+            throw new productGlobalErrorHandler(400, "invalid category id")
         }
-        const finalImage = images || [];
-        if (finalImage.length > 0) {
-            const hasPrimary = finalImage.some((img) => img.isPrimary);
-            if (!hasPrimary) finalImage[0].isPrimary = true;
+
+        let finalImages = images || []
+        if (finalImages.length > 0) {
+            const hasPrimaryImage = finalImages.some((img) => img.isPrimary === true);
+            if (!hasPrimaryImage) {
+                finalImages[0].isPrimary = true
+            }
+
         }
-        const product = await product.create({
+        const product = await Product.create({
             name,
             description,
             images: finalImage,
