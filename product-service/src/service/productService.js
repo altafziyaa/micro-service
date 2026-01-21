@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import productGlobalErrorHandler from "../utils/globalErrorHandler";
 import Product from "../model/productSchema.js";
+
 class productService {
   async createProduct(name, description, images, categoryId, price) {
     if (!name || !description || !images || !categoryId || !price) {
@@ -87,7 +88,10 @@ class productService {
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       throw new productGlobalErrorHandler(400, "Invalid product id");
     }
-    const product = await Product.findOne({ _id: productId, isValid: true });
+    const product = await Product.findOne({
+      _id: productId,
+      isValid: true,
+    });
 
     if (!product) {
       throw new productGlobalErrorHandler(404, "product not found");
@@ -95,6 +99,26 @@ class productService {
     product.isActive = false;
     await product.save();
     return { message: "product delte successfully" };
+  }
+  async undoDeleteProduct(productId) {
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      throw new productGlobalErrorHandler(400, "Invalid product id");
+    }
+
+    const undoProduct = await Product.findOne({
+      _id: productId,
+      isValid: true,
+    });
+
+    if (!undoProduct) {
+      throw new productGlobalErrorHandler(404, "product not found");
+    }
+
+    undoProduct.isActive = true;
+    undoProduct.deletedAt = null;
+
+    await undoProduct.save();
+    return { message: "product not delete" };
   }
 }
 export default new productService();
