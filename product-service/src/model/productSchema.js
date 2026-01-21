@@ -20,6 +20,7 @@ const productSchema = new mongoose.Schema(
     },
     price: { type: Number, required: true, min: 0 },
     isActive: { type: Boolean, default: true },
+    deletedAt: { type: Date, default: null },
   },
   { timestamps: true },
 );
@@ -28,5 +29,4 @@ productSchema.index({ name: "text", description: "text" });
 productSchema.index({ categoryId: 1 });
 productSchema.index({ isActive: 1 });
 
-export const Product = new mongoose.model("Product", productSchema);
-+
+export default mongoose.model("Product", productSchema);

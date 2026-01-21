@@ -36,7 +36,7 @@ class productService {
     }
 
     const product = await Product.findOne({ _id: productId, isActive: true })
-      .papulate("categoryId", "name")
+      .populate("categoryId", "name")
       .select("-__v");
 
     if (!product) throw new productGlobalErrorHandler(404, "product not found");
@@ -45,11 +45,11 @@ class productService {
   }
 
   async getAllProduct(page = 2, limit = 10) {
-    skip = (page - 1) * limit;
-    const products = await Product.find({ isactive: true })
-      .papulate("categoryId", "name")
+    const skip = (page - 1) * limit;
+    const products = await Product.find({ isActive: true })
+      .populate("categoryId", "name")
       .select("name price images categoryId")
-      .sort({ createdat: -1 })
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
@@ -65,6 +65,9 @@ class productService {
       _id: productId,
       isActive: true,
     });
+    if (!checkActiveProduct) {
+      throw new productGlobalErrorHandler(404, "Product not found");
+    }
 
     const allowedUpdatedFields = [
       "name",
@@ -90,7 +93,7 @@ class productService {
     }
     const product = await Product.findOne({
       _id: productId,
-      isValid: true,
+      isActive: true,
     });
 
     if (!product) {
@@ -107,7 +110,7 @@ class productService {
 
     const undoProduct = await Product.findOne({
       _id: productId,
-      isValid: true,
+      isActive: true,
     });
 
     if (!undoProduct) {
