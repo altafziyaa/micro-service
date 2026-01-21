@@ -54,5 +54,33 @@ class productService {
 
     return products;
   }
+
+  async getUpdateProduct(productId, data) {
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      throw new productGlobalErrorHandler(400, "Invalid product id");
+    }
+
+    const checkActiveProduct = await Product.findOne({
+      _id: productId,
+      isactive: true,
+    });
+
+    const allowedUpdatedFields = [
+      "name",
+      "description",
+      "images",
+      "price",
+      "categoryId",
+    ];
+
+    for (let key in data) {
+      if (allowedUpdatedFields.includes(key)) {
+        checkActiveProduct[key] = data[key];
+      }
+    }
+    await checkActiveProduct.save();
+
+    return checkActiveProduct;
+  }
 }
 export default new productService();
