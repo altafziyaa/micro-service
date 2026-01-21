@@ -42,5 +42,17 @@ class productService {
 
     return product;
   }
+
+  async getAllProduct(page = 2, limit = 10) {
+    skip = (page - 1) * limit;
+    const products = await Product.find({ isactive: true })
+      .papulate("categoryId", "name")
+      .select("name price images categoryId")
+      .sort({ createdat: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    return products;
+  }
 }
 export default new productService();
