@@ -62,7 +62,7 @@ class productService {
 
     const checkActiveProduct = await Product.findOne({
       _id: productId,
-      isactive: true,
+      isActive: true,
     });
 
     const allowedUpdatedFields = [
@@ -81,6 +81,20 @@ class productService {
     await checkActiveProduct.save();
 
     return checkActiveProduct;
+  }
+
+  async deleteProduct(productId) {
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      throw new productGlobalErrorHandler(400, "Invalid product id");
+    }
+    const product = await Product.findOne({ _id: productId, isValid: true });
+
+    if (!product) {
+      throw new productGlobalErrorHandler(404, "product not found");
+    }
+    product.isActive = false;
+    await product.save();
+    return { message: "product delte successfully" };
   }
 }
 export default new productService();
