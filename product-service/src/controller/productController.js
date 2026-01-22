@@ -2,7 +2,7 @@ import productService from "../service/productService";
 import productGlobalErrorHandler from "../utils/globalErrorHandler";
 
 class ProductController {
-  async createProducts(req, res, next) {
+  async createProduct(req, res, next) {
     const { name, description, images, categoryId, price } = req.body;
     try {
       if (!name || !description || !images || !categoryId || !price) {
@@ -50,6 +50,29 @@ class ProductController {
         success: true,
         Message: "product fetched successfully",
         data: getMyproduct,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getAllProducts(req, res, next) {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+
+    try {
+      const allproduct = await productService.getAllProduct({
+        page,
+        limit,
+        ...req.query,
+      });
+      if (!allproduct) {
+        throw new productGlobalErrorHandler(403, "products not available");
+      }
+      return res.status(200).json({
+        success: true,
+        Message: "Products fetched successfully",
+        data: allproduct,
       });
     } catch (error) {
       next(error);
