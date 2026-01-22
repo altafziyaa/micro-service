@@ -81,20 +81,43 @@ class ProductController {
 
   async getUpdateProduct(req, res, next) {
     const { productId } = req.params;
-    const userId = req.query;
+    const userId = req.user?.userId;
+    const updateData = req.body;
 
     try {
       if (!productId)
         throw new productGlobalErrorHandler(400, "product not found");
       if (!userId) throw new productGlobalErrorHandler(400, "Unauthorozed");
-      const updateProduct = productService.getUpdateProduct({
+      const updateProduct = await productService.getUpdateProduct({
         productId,
         userId,
+        updateData,
       });
-      return res.status(201).json({
+      return res.status(200).json({
         success: true,
         Message: "update product successfully",
         data: updateProduct,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async DeleteProduct(productId) {
+    const { productId } = req.params;
+    const userId = req.user?.userId;
+
+    try {
+      if (!productId)
+        throw new productGlobalErrorHandler(400, "product not found");
+      if (!userId) {
+        throw new productGlobalErrorHandler(401, "Unauthorized");
+      }
+      await productService.deleteProduct(productId, userId);
+
+      return res.status(200).json({
+        success: true,
+        Message: "Product delete Successfully",
       });
     } catch (error) {
       next(error);

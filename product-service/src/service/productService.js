@@ -101,7 +101,7 @@ class productService {
     }
     product.isActive = false;
     await product.save();
-    return { message: "product delte successfully" };
+    return { message: "product delete successfully" };
   }
   async undoDeleteProduct(productId) {
     if (!mongoose.Types.ObjectId.isValid(productId)) {
