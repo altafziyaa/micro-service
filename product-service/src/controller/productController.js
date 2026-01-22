@@ -78,4 +78,26 @@ class ProductController {
       next(error);
     }
   }
+
+  async getUpdateProduct(req, res, next) {
+    const { productId } = req.params;
+    const userId = req.query;
+
+    try {
+      if (!productId)
+        throw new productGlobalErrorHandler(400, "product not found");
+      if (!userId) throw new productGlobalErrorHandler(400, "Unauthorozed");
+      const updateProduct = productService.getUpdateProduct({
+        productId,
+        userId,
+      });
+      return res.status(201).json({
+        success: true,
+        Message: "update product successfully",
+        data: updateProduct,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
