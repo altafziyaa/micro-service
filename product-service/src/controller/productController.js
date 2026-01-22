@@ -5,19 +5,19 @@ class ProductController {
   async createProduct(req, res, next) {
     const { name, description, images, categoryId, price } = req.body;
     try {
-      if (!name || !description || !images || !categoryId || !price) {
-        throw new productGlobalErrorHandler(400, "All fields are required");
-      }
+      // if (!name || !description || !images || !categoryId || !price) {
+      //   throw new productGlobalErrorHandler(400, "All fields are required");
+      // }
 
-      const product = await productService.createProduct({
+      const product = await productService.createProduct(
         name,
         description,
         images,
         categoryId,
         price,
-      });
+      );
 
-      return res(201).json({
+      return res.status(201).json({
         success: true,
         Message: "create product successfully",
         data: product,
@@ -29,7 +29,6 @@ class ProductController {
 
   async getproduct(req, res, next) {
     const { productId } = req.params;
-    const userId = req.user?.userId;
 
     try {
       if (!productId) {
@@ -42,10 +41,7 @@ class ProductController {
           "Unauthorized: user id not found",
         );
       }
-      const getMyproduct = await productService.getProducts({
-        productId,
-        userId,
-      });
+      const getMyproduct = await productService.getProducts(productId);
       return res.status(200).json({
         success: true,
         Message: "product fetched successfully",
@@ -103,7 +99,7 @@ class ProductController {
     }
   }
 
-  async DeleteProduct(productId) {
+  async DeleteProduct(req, res, next) {
     const { productId } = req.params;
     const userId = req.user?.userId;
 

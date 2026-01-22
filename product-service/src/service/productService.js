@@ -7,7 +7,7 @@ class productService {
     if (!name || !description || !images || !categoryId || !price) {
       throw new productGlobalErrorHandler(400, "All fields are required");
     }
-    if (!price.amout || price <= 0) {
+    if (!price.amount || price.amount <= 0) {
       throw new productGlobalErrorHandler(400, "Add some amount ");
     }
     if (!mongoose.Types.ObjectId.isValid(categoryId)) {
@@ -117,7 +117,7 @@ class productService {
       throw new productGlobalErrorHandler(404, "product not found");
     }
 
-    undoProduct.isActive = true;
+    undoProduct.isActive = false;
     undoProduct.deletedAt = null;
 
     await undoProduct.save();
