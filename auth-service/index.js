@@ -3,11 +3,10 @@ import connectDB from "./src/config/db.js";
 import authRoutes from "./src/routes/auth.routes.js";
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 app.use(express.json());
 
-// ✅ mount routes
 app.use("/api/auth", authRoutes);
 
 connectDB();

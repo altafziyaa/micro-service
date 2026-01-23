@@ -1,4 +1,3 @@
-import { useId } from "react";
 import authService from "../services/auth.service.js";
 
 class AuthController {
@@ -87,7 +86,7 @@ class AuthController {
     }
   };
 
-  updateProfile= async (req, res, next)=> {
+  updateProfile = async (req, res, next) => {
     const userId = req.user?.id;
     const { name } = req.body;
     try {
@@ -107,7 +106,7 @@ class AuthController {
     } catch (error) {
       next(error);
     }
-  }
+  };
   signOut = async (req, res, next) => {
     const logOutId = req.user?.userId;
 

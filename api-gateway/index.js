@@ -1,12 +1,9 @@
-import axios from "axios";
 import express from "express";
-import { createProxyMiddleware } from "http-proxy-middleware";
-
+import gatewayRoutes from "./src/routes/gatewayRoutes.js";
 const app = express();
-const router = express.Router();
-const port = 3002;
 app.use(express.json());
+app.use("/api", gatewayRoutes);
 
-app.listen(port, () => {
-  console.log(`server listening on ${port}`);
+app.listen(3000, () => {
+  console.log("API Gateway running on port 3000");
 });
