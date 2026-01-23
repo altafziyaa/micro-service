@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { User } from "../models/User.js";
-import jwtConfig from "../config/jwt.js";
+import { jwtConfig } from "../config/jwt.js";
 import bcrypt from "bcrypt";
 import AuthGlobalErrorHandler from "../utils/Auth.Global.Errorhandle.js";
 
@@ -48,6 +48,7 @@ class AuthService {
     const isMatch = await bcrypt.compare(password, loginUser.password);
 
     if (!isMatch) throw new AuthGlobalErrorHandler(401, "Invalid Credentials");
+    console.log(jwtConfig);
 
     const accessToken = jwt.sign(
       { userId: loginUser._id, role: loginUser.role },
