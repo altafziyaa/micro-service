@@ -51,7 +51,10 @@ class productService {
 
   async getAllProduct(page = 2, limit = 10) {
     const skip = (page - 1) * limit;
-    const products = await Product.find({ isActive: true })
+    const products = await Product.find({
+      isActive: true,
+      deletedAt: null,
+    })
       .populate("categoryId", "name")
       .select("name price images categoryId")
       .sort({ createdAt: -1 })
@@ -66,15 +69,16 @@ class productService {
       throw new productGlobalErrorHandler(400, "Invalid product id");
     }
 
-    const checkActiveProduct = await Product.findOne({
+    const product = await Product.findOne({
       _id: productId,
       isActive: true,
     });
-    if (!checkActiveProduct) {
+
+    if (!product) {
       throw new productGlobalErrorHandler(404, "Product not found");
     }
 
-    const allowedUpdatedFields = [
+    const allowedFields = [
       "name",
       "description",
       "images",
@@ -83,13 +87,13 @@ class productService {
     ];
 
     for (let key in data) {
-      if (allowedUpdatedFields.includes(key)) {
-        checkActiveProduct[key] = data[key];
+      if (allowedFields.includes(key)) {
+        product[key] = data[key];
       }
     }
-    await checkActiveProduct.save();
 
-    return checkActiveProduct;
+    await product.save();
+    return product;
   }
 
   async deleteProduct(productId) {

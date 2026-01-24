@@ -31,12 +31,6 @@ class ProductController {
         throw new productGlobalErrorHandler(400, "product id required");
       }
 
-      if (!userId) {
-        throw new productGlobalErrorHandler(
-          401,
-          "Unauthorized: user id not found",
-        );
-      }
       const getMyproduct = await productService.getProducts(productId);
       return res.status(200).json({
         success: true,
@@ -53,11 +47,7 @@ class ProductController {
     const limit = Number(req.query.limit) || 10;
 
     try {
-      const allproduct = await productService.getAllProduct({
-        page,
-        limit,
-        ...req.query,
-      });
+      const allproduct = await productService.getAllProduct(page, limit);
       if (!allproduct) {
         throw new productGlobalErrorHandler(403, "products not available");
       }
@@ -73,7 +63,6 @@ class ProductController {
 
   async getUpdateProduct(req, res, next) {
     const { productId } = req.params;
-    const userId = req.user?.userId;
     const updateData = req.body;
 
     try {
@@ -82,7 +71,6 @@ class ProductController {
       if (!userId) throw new productGlobalErrorHandler(400, "Unauthorozed");
       const updateProduct = await productService.getUpdateProduct({
         productId,
-        userId,
         updateData,
       });
       return res.status(200).json({
