@@ -1,13 +1,9 @@
 import express from "express";
+import connectDB from "./src/config/connectDB.js";
+import productrouter from "./src/router/productRoute.js";
 const app = express();
-const port = 3001;
+app.use(express.json());
+app.use("/api", productrouter);
 
-app.get("/product", (req, res) => {
-  res.json([
-    { id: 1, name: "laptop", price: "50k" },
-    { id: 2, name: "keyboard", price: "10k" },
-    { id: 3, name: "mause", price: "5k" },
-  ]);
-});
-
-app.listen(port, () => console.log(`listening on port ${port}!`));
+connectDB();
+app.listen(4000, () => console.log(`listening on port 4000 !`));

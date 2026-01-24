@@ -1,15 +1,20 @@
 import mongoose from "mongoose";
-import productGlobalErrorHandler from "../utils/globalErrorHandler";
+import productGlobalErrorHandler from "../utils/globalErrorHandler.js";
 import Product from "../model/productSchema.js";
 
 class productService {
   async createProduct(name, description, images, categoryId, price) {
-    if (!name || !description || !images || !categoryId || !price) {
-      throw new productGlobalErrorHandler(400, "All fields are required");
+    if (!name || !description || !categoryId || price === undefined) {
+      throw new productGlobalErrorHandler(
+        400,
+        "All required fields are missing",
+      );
     }
-    if (!price.amount || price.amount <= 0) {
-      throw new productGlobalErrorHandler(400, "Add some amount ");
+
+    if (typeof price !== "number" || price <= 0) {
+      throw new productGlobalErrorHandler(400, "Price must be greater than 0");
     }
+
     if (!mongoose.Types.ObjectId.isValid(categoryId)) {
       throw new productGlobalErrorHandler(400, "invalid category id");
     }

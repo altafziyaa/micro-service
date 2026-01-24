@@ -16,5 +16,16 @@ router.post("/auth/login", async (req, res) => {
   }
 });
 
+router.post("/create-product", async (req, res) => {
+  try {
+    const response = await axios.post(`${services.PRODUCT_SERVICE}`, {
+      Headers: {
+        Authorization: req.headers.authorization,
+      },
+    });
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).json({ success: true, message: "product service error" });
+  }
+});
 export default router;
-// john.doe@example.com

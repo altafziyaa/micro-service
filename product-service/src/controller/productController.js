@@ -1,14 +1,10 @@
-import productService from "../service/productService";
-import productGlobalErrorHandler from "../utils/globalErrorHandler";
+import productService from "../service/productService.js";
+import productGlobalErrorHandler from "../utils/globalErrorHandler.js";
 
 class ProductController {
   async createProduct(req, res, next) {
     const { name, description, images, categoryId, price } = req.body;
     try {
-      // if (!name || !description || !images || !categoryId || !price) {
-      //   throw new productGlobalErrorHandler(400, "All fields are required");
-      // }
-
       const product = await productService.createProduct(
         name,
         description,
