@@ -49,7 +49,7 @@ class productService {
     return product;
   }
 
-  async getAllProduct(page = 2, limit = 10) {
+  async getAllProduct(page = 1, limit = 10) {
     const skip = (page - 1) * limit;
     const products = await Product.find({
       isActive: true,
@@ -109,7 +109,9 @@ class productService {
       throw new productGlobalErrorHandler(404, "product not found");
     }
     product.isActive = false;
+    product.deletedAt = new Date();
     await product.save();
+
     return { message: "product delete successfully" };
   }
   async undoDeleteProduct(productId) {
@@ -117,20 +119,22 @@ class productService {
       throw new productGlobalErrorHandler(400, "Invalid product id");
     }
 
-    const undoProduct = await Product.findOne({
+    const product = await Product.findOne({
       _id: productId,
-      isActive: true,
+      isActive: false,
+      deletedAt: { $ne: null },
     });
 
-    if (!undoProduct) {
-      throw new productGlobalErrorHandler(404, "product not found");
+    if (!product) {
+      throw new productGlobalErrorHandler(404, "Deleted product not found");
     }
 
-    undoProduct.isActive = false;
-    undoProduct.deletedAt = null;
+    product.isActive = true;
+    product.deletedAt = null;
 
-    await undoProduct.save();
-    return { message: "product not delete" };
+    await product.save();
+
+    return { message: "Product restored successfully" };
   }
 }
 export default new productService();

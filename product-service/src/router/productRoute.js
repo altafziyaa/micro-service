@@ -2,11 +2,14 @@ import express from "express";
 import productController from "../controller/productController.js";
 const router = express.Router();
 
-router.post("/create/product", productController.createProduct);
-router.get("/my-product/:productId", productController.getproduct);
-router.get("/all-product", productController.getAllProducts);
-router.put("/upadte/product", productController.getUpdateProduct);
-router.delete("/product/create", productController.DeleteProduct);
-router.get("/product/create", productController.undoDeleteProduct);
+router.post("/products", productController.createProduct);
+router.get("/products/:productId", productController.getproduct);
+router.get("/products", productController.getAllProducts);
+router.put("/products/:productId", productController.getUpdateProduct);
+router.delete("/products/:productId", productController.DeleteProduct);
+router.patch(
+  "/products/:productId/restore",
+  productController.undoDeleteProduct,
+);
 
 export default router;
