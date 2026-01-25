@@ -68,15 +68,16 @@ class ProductController {
     try {
       if (!productId)
         throw new productGlobalErrorHandler(400, "product not found");
-      if (!userId) throw new productGlobalErrorHandler(400, "Unauthorozed");
-      const updateProduct = await productService.getUpdateProduct({
+
+      const updatedProduct = await productService.getUpdateProduct(
         productId,
         updateData,
-      });
+      );
+
       return res.status(200).json({
         success: true,
         Message: "update product successfully",
-        data: updateProduct,
+        data: updatedProduct,
       });
     } catch (error) {
       next(error);
@@ -85,14 +86,12 @@ class ProductController {
 
   async DeleteProduct(req, res, next) {
     const { productId } = req.params;
-    const userId = req.user?.userId;
 
     try {
       if (!productId)
         throw new productGlobalErrorHandler(400, "product not found");
-      if (!userId) throw new productGlobalErrorHandler(401, "Unauthorized");
 
-      await productService.deleteProduct(productId, userId);
+      await productService.deleteProduct(productId);
 
       return res.status(200).json({
         success: true,
@@ -102,22 +101,18 @@ class ProductController {
       next(error);
     }
   }
-
   async undoDeleteProduct(req, res, next) {
     const { productId } = req.params;
-    const userId = req.user?.userId;
 
     try {
       if (!productId)
         throw new productGlobalErrorHandler(400, "product not found");
-      if (!userId) throw new productGlobalErrorHandler(401, "Unauthorized");
-      const restoredProduct = await productService.undoDeleteProduct({
-        productId,
-        userId,
-      });
+
+      const restoredProduct = await productService.undoDeleteProduct(productId);
+
       return res.status(200).json({
         success: true,
-        Message: "undo product ",
+        Message: "product restored successfully",
         data: restoredProduct,
       });
     } catch (error) {

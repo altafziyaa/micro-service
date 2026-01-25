@@ -1,8 +1,13 @@
 import express from "express";
 import connectDB from "./src/config/connectDB.js";
 import productRouter from "./src/router/productRoute.js";
+
+import "./src/model/category.js";
+import "./src/model/productSchema.js";
+
 const app = express();
 app.use(express.json());
+
 app.use("/api", productRouter);
 
 connectDB();
