@@ -16,7 +16,7 @@ router.post("/auth/login", async (req, res) => {
   }
 });
 
-router.post("/create-product", async (req, res) => {
+router.post("/products", async (req, res) => {
   try {
     const response = await axios.post(`${services.PRODUCT_SERVICE}`, {
       Headers: {
