@@ -51,4 +51,20 @@ class cartService {
     item.quantity = quantity;
     return await cart.save();
   }
+
+  async removeFromCart(userId, productId) {
+    return await Carts.findOneAndUpdate(
+      { userId },
+      { $pull: { items: { productId } } },
+      { new: true },
+    );
+  }
+
+  async clearCart(userId) {
+    return await Carts.findOneAndUpdate(
+      { userId },
+      { items: [], totalPrice: 0, status: "ordered" },
+      { new: true },
+    );
+  }
 }
