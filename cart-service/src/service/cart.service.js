@@ -34,4 +34,21 @@ class cartService {
     }
     return cart.save();
   }
+
+  async updateCartQuantity(userId, productId, quantity) {
+    if (quantity < 1) {
+      throw new cartGlobalErrorHandler(401, "Quantity must be at least 1");
+    }
+
+    const cart = await Carts.findOne({ userId });
+    if (!cart) throw new cartGlobalErrorHandler(401, "cart not found");
+
+    const item = await Carts.find((item) => {
+      item.productId.toString() === productId;
+    });
+
+    if (!item) throw new cartGlobalErrorHandler(401, "product not in cart");
+    item.quantity = quantity;
+    return await cart.save();
+  }
 }
