@@ -29,7 +29,7 @@ class cartController {
       if (!userId) return res.status(400).json({ message: "user id required" });
       if (!productId)
         return res.status(400).json({ message: "product is required" });
-      const updateCart = cartService.updateCartQuantity({
+      const updateCart = await cartService.updateCartQuantity({
         userId,
         productId,
         quantity,
@@ -62,7 +62,9 @@ class cartController {
         message: "remove cart successfully",
         removeCarts,
       });
-    } catch (error) {}
+    } catch (error) {
+      next(error);
+    }
   }
 
   async clearCart(req, res, next) {
@@ -72,9 +74,13 @@ class cartController {
         return res.status(400).json({ message: "user id required" });
       }
 
-      const clearFromCart = cartService.clearCart(userId);
-      return res.status(200).json({ success: true, message: "carts clear " clearFromCart});
-    } catch (error) {}
+      const clearFromCart = await cartService.clearCart(userId);
+      return res
+        .status(200)
+        .json({ success: true, message: "carts clear", clearFromCart });
+    } catch (error) {
+      next(error);
+    }
   }
 }
 
