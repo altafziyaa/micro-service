@@ -44,6 +44,28 @@ class cartController {
       next(error);
     }
   }
+
+  async removeFromCart(req, res, next) {
+    const { userId, productId } = req.body;
+    try {
+      if (!userId) return res.status(400).json({ message: "user id required" });
+      if (!productId)
+        return res.status(400).json({ message: "product Id required" });
+
+      const removeCarts = await cartService.removeFromCart({
+        userId,
+        productId,
+      });
+
+      return res
+        .status(200)
+        .json({
+          success: true,
+          message: "remove cart successfully",
+          removeCarts,
+        });
+    } catch (error) {}
+  }
 }
 
 export default new cartController();
