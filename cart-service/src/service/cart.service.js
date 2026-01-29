@@ -2,7 +2,7 @@ import cartGlobalErrorHandler from "../utils/cart.error.handler";
 import Carts from "../model/Carts.js";
 
 class cartService {
-  async addCart(userId, product) {
+  async addToCart(userId, product) {
     if (!userId) {
       throw new cartGlobalErrorHandler(401, "Invalid creadentials");
     }
@@ -68,3 +68,5 @@ class cartService {
     );
   }
 }
+
+export default new cartService();
