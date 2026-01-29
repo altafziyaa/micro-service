@@ -57,13 +57,23 @@ class cartController {
         productId,
       });
 
-      return res
-        .status(200)
-        .json({
-          success: true,
-          message: "remove cart successfully",
-          removeCarts,
-        });
+      return res.status(200).json({
+        success: true,
+        message: "remove cart successfully",
+        removeCarts,
+      });
+    } catch (error) {}
+  }
+
+  async clearCart(req, res, next) {
+    const { userId } = req.body;
+    try {
+      if (!userId) {
+        return res.status(400).json({ message: "user id required" });
+      }
+
+      const clearFromCart = cartService.clearCart(userId);
+      return res.status(200).json({ success: true, message: "carts clear " clearFromCart});
     } catch (error) {}
   }
 }
