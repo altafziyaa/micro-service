@@ -6,8 +6,10 @@ const app = express();
 app.use(json());
 const port = 3000;
 
-app.use("/cart", cartRouter);
+app.use("api/v1", cartRouter);
 connectDB();
 app.listen(port, () => {
-  console.log(`app running on ${port}`);
+  console.log(`app running on http://localhost:${port}`);
 });
+
+// http://localhost:3000/api/v1/addcart
