@@ -1,31 +1,132 @@
 import express from "express";
 import axios from "axios";
 import services from "../config/services.js";
+import { verifyJwt } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/auth/login", async (req, res) => {
+// Signup
+router.post("/signup", async (req, res) => {
+  try {
+    const response = await axios.post(
+      `${services.AUTH_SERVICE}/api/auth/signup`,
+      req.body,
+    );
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    res
+      .status(error.response?.status || 500)
+      .json(error.response?.data || { message: "Auth service error" });
+  }
+});
+
+// Login
+router.post("/login", async (req, res) => {
   try {
     const response = await axios.post(
       `${services.AUTH_SERVICE}/api/auth/login`,
       req.body,
     );
-    res.json(response.data);
+    res.status(response.status).json(response.data);
   } catch (error) {
-    res.status(500).json({ message: "auth service error" });
+    res
+      .status(error.response?.status || 500)
+      .json(error.response?.data || { message: "Auth service error" });
   }
 });
 
-router.post("/products", async (req, res) => {
+// Logout
+router.post("/logout", verifyJwt, async (req, res) => {
   try {
-    const response = await axios.post(`${services.PRODUCT_SERVICE}`, {
-      Headers: {
-        Authorization: req.headers.authorization,
+    const response = await axios.post(
+      `${services.AUTH_SERVICE}/api/auth/logout`,
+      {},
+      {
+        headers: {
+          authorization: req.headers.authorization,
+        },
       },
-    });
-    res.json(response.data);
+    );
+    res.status(response.status).json(response.data);
   } catch (error) {
-    res.status(500).json({ success: true, message: "product service error" });
+    res
+      .status(error.response?.status || 500)
+      .json(error.response?.data || { message: "Auth service error" });
   }
 });
+
+// My Profile
+router.get("/me", verifyJwt, async (req, res) => {
+  try {
+    const response = await axios.get(`${services.AUTH_SERVICE}/api/auth/me`, {
+      headers: {
+        authorization: req.headers.authorization,
+      },
+    });
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    res
+      .status(error.response?.status || 500)
+      .json(error.response?.data || { message: "Auth service error" });
+  }
+});
+
+// Update Profile
+router.put("/me", verifyJwt, async (req, res) => {
+  try {
+    const response = await axios.put(
+      `${services.AUTH_SERVICE}/api/auth/me`,
+      req.body,
+      {
+        headers: {
+          authorization: req.headers.authorization,
+        },
+      },
+    );
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    res
+      .status(error.response?.status || 500)
+      .json(error.response?.data || { message: "Auth service error" });
+  }
+});
+
+// Get all users
+router.get("/users", verifyJwt, async (req, res) => {
+  try {
+    const response = await axios.get(
+      `${services.AUTH_SERVICE}/api/auth/users`,
+      {
+        headers: {
+          authorization: req.headers.authorization,
+        },
+      },
+    );
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    res
+      .status(error.response?.status || 500)
+      .json(error.response?.data || { message: "Auth service error" });
+  }
+});
+
+// Delete user
+router.delete("/users/:id", verifyJwt, async (req, res) => {
+  try {
+    const response = await axios.delete(
+      `${services.AUTH_SERVICE}/api/auth/users/${req.params.id}`,
+      {
+        headers: {
+          authorization: req.headers.authorization,
+        },
+      },
+    );
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    res
+      .status(error.response?.status || 500)
+      .json(error.response?.data || { message: "Auth service error" });
+  }
+});
+
 export default router;
