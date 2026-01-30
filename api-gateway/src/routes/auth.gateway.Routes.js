@@ -1,7 +1,6 @@
 import express from "express";
 import axios from "axios";
 import services from "../config/services.js";
-import { verifyJwt } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -36,7 +35,7 @@ router.post("/login", async (req, res) => {
 });
 
 // Logout
-router.post("/logout", verifyJwt, async (req, res) => {
+router.post("/logout", async (req, res) => {
   try {
     const response = await axios.post(
       `${services.AUTH_SERVICE}/api/auth/logout`,
@@ -56,7 +55,7 @@ router.post("/logout", verifyJwt, async (req, res) => {
 });
 
 // My Profile
-router.get("/me", verifyJwt, async (req, res) => {
+router.get("/me", async (req, res) => {
   try {
     const response = await axios.get(`${services.AUTH_SERVICE}/api/auth/me`, {
       headers: {
@@ -72,7 +71,7 @@ router.get("/me", verifyJwt, async (req, res) => {
 });
 
 // Update Profile
-router.put("/me", verifyJwt, async (req, res) => {
+router.put("/me", async (req, res) => {
   try {
     const response = await axios.put(
       `${services.AUTH_SERVICE}/api/auth/me`,
@@ -92,7 +91,7 @@ router.put("/me", verifyJwt, async (req, res) => {
 });
 
 // Get all users
-router.get("/users", verifyJwt, async (req, res) => {
+router.get("/users", async (req, res) => {
   try {
     const response = await axios.get(
       `${services.AUTH_SERVICE}/api/auth/users`,
@@ -111,7 +110,7 @@ router.get("/users", verifyJwt, async (req, res) => {
 });
 
 // Delete user
-router.delete("/users/:id", verifyJwt, async (req, res) => {
+router.delete("/users/:id", async (req, res) => {
   try {
     const response = await axios.delete(
       `${services.AUTH_SERVICE}/api/auth/users/${req.params.id}`,
