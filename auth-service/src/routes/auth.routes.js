@@ -6,9 +6,9 @@ const router = express.Router();
 router.post("/signup", authController.createUser);
 router.post("/login", authController.signIn);
 router.post("/logout", authController.signOut);
-router.get("/my-profile", authMiddleware, authController.getMyProfile);
-router.get("/update-profile", authMiddleware, authController.updateProfile);
-router.get("/all-users", authMiddleware, authController.getAllProfiles);
+router.get("/me", authMiddleware, authController.getMyProfile);
+router.put("/me", authMiddleware, authController.updateProfile);
+router.get("/users", authMiddleware, authController.getAllProfiles);
 
 router.delete("/delete-profile", authMiddleware, authController.deleteUser);
 

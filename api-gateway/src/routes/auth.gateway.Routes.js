@@ -1,6 +1,7 @@
 import express from "express";
 import axios from "axios";
 import services from "../config/services.js";
+// import { authMiddleware } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
