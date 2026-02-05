@@ -1,4 +1,4 @@
-import Dashboard from "../models/dashboard.model.js";
+import Dashboard from "../model/dashboard.model.js";
 
 export const getDashboard = async (req, res) => {
   const dashboard = await Dashboard.findById("GLOBAL").lean();

@@ -1,7 +1,7 @@
 import { buildUserStats } from "./userStats.service.js";
 import { buildProductStats } from "./productStats.service.js";
 import { buildCartStats } from "./cartStats.service.js";
-import Dashboard from "../models/dashboard.model.js";
+import Dashboard from "../model/dashboard.model.js";
 
 export const generateDashboardSnapshot = async () => {
   const users = await buildUserStats();
